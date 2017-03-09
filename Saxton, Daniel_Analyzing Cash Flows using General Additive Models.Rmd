@@ -1,0 +1,317 @@
+---
+title: "Predicting cash flows using generalized additive models"
+author: "Daniel Saxton"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(gam)
+```
+
+## Outline
+
+- Problem description
+- Probabilistic model
+- Generalized additive models
+- R code
+
+## Problem
+
+Given information on a customer and the terms of a loan, determine how much cash we expect to collect from this customer.
+
+- Loan amount
+- Loan term
+- Payment amount
+- Covariate values
+
+## Two key behaviors
+
+- Default
+- Prepayment
+
+Both of these are highly dependent on where a customer is in the loan life cycle.
+
+## Probabilistic model
+
+Associate with each loan two independent processes
+
+- $T_d$: time until default
+- $T_p$: time until prepayment
+
+## Probabilistic model
+
+Whether a loan with term $n$ is defaulted, prepaid or paid at term corresponds to these events
+
+- $T_d > n$, $T_p > n$: loan is paid at term
+- $T_d \leq n$, $T_d \leq T_p$: loan is defaulted
+- $T_p \leq n$, $T_p < T_d$: loan is prepaid
+
+In words, which of $T_d$, $T_p$ or $n$ is the smallest determines the outcome of the loan, with $T_d$ winning ties.
+
+## Expected cash
+
+If $X$ is the total collected on a given loan and $Y_i$ the amount collected at installment $i$
+
+$$
+\text{E}(X) = \sum_{i=1}^{n} \text{E}(Y_i) .
+$$
+
+## Expected cash
+
+Also if $c$ is the regularly-scheduled payment amount and $c_i$ the payment amount plus remaining principal at time $i$ then
+
+$$
+\text{E}(Y_i) = c P(T_d > i) P(T_p > i) + c_i P(T_d > i) P(T_p = i) .
+$$
+
+## Hazard function
+
+For a positive integer-valued event time $T$ define the hazard function for $k \in \mathbb{N}_+$
+
+$$
+h(k) = P(T = k \mid T \geq k) .
+$$
+
+We also have the nice relationship
+
+\begin{align}
+P(T > k) &= \prod_{j=1}^{k} \left [ 1 - h(j) \right ] .
+\end{align}
+
+## Hazard function
+
+- The hazard function is a probability and so can be modeled using any probabilistic classifier
+
+- The key is to properly format the data and treat the argument of the hazard function as a covariate
+
+## Sample data
+
+```{r, echo=FALSE}
+data = data.frame(event = c('default', 'prepay', 'default', 'full_pay'),
+                  install_num = c(1, 3, 2, 4),
+                  term = c(5, 15, 3, 4),
+                  payment = c(300, 200, 200, 300),
+                  amount = c(1000, 2000, 500, 1500),
+                  x = rpois(4, lambda=6))
+data
+```
+
+After formatting:
+
+```{r, echo=FALSE}
+expanded = data[c(rep(1, 1), rep(2, 3), rep(3, 2), rep(4, 4)),]
+expanded$install_num = c(1:1, 1:3, 1:2, 1:4)
+expanded$default = c(1, rep(0, 4), 1, rep(0, 4))
+expanded$prepay = c(rep(0, 3), 1, rep(0, 6))
+expanded$event = NULL
+rownames(expanded) = NULL
+expanded
+```
+
+## Generalized additive models
+
+Let $\mu_i \in \Theta$ be the mean of $y_i$, $g : \Theta \mapsto \mathbb{R}$ a link function and $\{ x_{ij} \}_{j=1}^{p}$ a set of covariate values.
+
+$$
+g(\mu_i) = s_0 + \sum_{j=1}^{p} s(x_{ij})
+$$
+
+where the $\{ s_j \}_{j=1}^{p}$ are smooth functions and $s_0$ a constant.  
+
+## Advantages
+
+- Less restrictive than GLMs, can model non-linearities
+- Easy to interpret
+- Useful as an exploratory tool, e.g., finding transformations
+
+## Disadvantages
+
+- More prone to overfit compared to linear models
+- Implementation is more challenging
+
+## Additive models in R
+
+- `gam` (Trevor Hastie)
+- `mgcv` (Simon Wood)
+
+## Example
+
+$$
+y_i = \log(x_i) + \epsilon_i
+$$
+
+```{r, fig.align='center'}
+x = rexp(100)
+y = log(x) + rnorm(100)
+data_set = data.frame(x, y)
+plot(data_set$x, data_set$y, xlab='x', ylab='y')
+```
+
+## Smooth fit
+
+```{r, echo=TRUE, message=FALSE, fig.align='center'}
+model = gam(y ~ s(x), data=data_set)
+plot(model)
+```
+
+## Smooth fit
+
+```{r, echo=TRUE, message=FALSE, fig.align='center'}
+model = gam(y ~ s(x, df=2), data=data_set)
+plot(model)
+```
+
+## Example
+
+$$
+y_i = x_i^2 + \epsilon_i
+$$
+
+```{r, fig.align='center'}
+x = rexp(100)
+y = x^2 + rnorm(100)
+data_set = data.frame(x, y)
+plot(data_set$x, data_set$y, xlab='x', ylab='y')
+```
+
+## Smooth fit
+
+```{r, echo=TRUE, message=FALSE, fig.align='center'}
+model = gam(y ~ s(x), data=data_set)
+plot(model)
+```
+
+## Additive logistic regression
+
+For data of the form $\{y_i, x_{i1}, \ldots , x_{ip} \}_{i=1}^{n}$ where $y_i \sim$ Bernoulli($p_i$).
+
+$$
+\log \left ( \frac{p_i}{1 - p_i} \right ) = s_0 + \sum_{j=1}^{p} s_j(x_{ij})
+$$
+
+## Additive hazard model
+
+```{r}
+expanded
+```
+
+```{r, echo=TRUE, eval=FALSE}
+default_model = gam(default ~ s(install_num) + s(x),
+                    data=df,
+                    family='binomial')
+
+prepay_model = gam(prepay ~ s(install_num) + s(x),
+                   data=df,
+                   family='binomial')
+```
+
+## Survival functions
+
+```{r, echo=TRUE, eval=FALSE}
+score_function = function(x, loan_term, default_model, prepay_model) {
+    # initialize data frame to be scored
+    x = data.frame(x)
+    x = x[rep(1, loan_term),]
+    x$install_num = 1:loan_term
+    rownames(x) = NULL
+    
+    # calculate complement of hazard function by installment
+    def_scr = predict(default_model, newdata=x)
+    prepay_scr = predict(prepay_model, newdata=x)
+    def_scr = 1 / (exp(def_scr) + 1)
+    prepay_scr = 1 / (exp(prepay_scr) + 1)
+    
+    # calculate default and prepayment curves
+    surv_func = data.frame(default_curve = cumprod(def_scr),
+                           prepay_curve = cumprod(prepay_scr))
+    
+    return(surv_func)
+}
+```
+
+## Amortization schedule
+
+We also need to know the remaining principal at each installment and so have to compute a loan's amortization schedule.  For this we have to determine the (implicit) interest rate of the loan.
+
+For a loan with loan amount $A$, payment amount $c$ and loan term $n$, the interest rate $r$ is the solution to the equation
+
+$$
+\frac{A}{\sum_{i=1}^{n} (1 + r)^{-i}} - c = 0 .
+$$
+
+## Interest calculation
+
+```{r, echo=TRUE, eval=TRUE}
+library(nleqslv)
+
+get_interest = function(loan_term, loan_amount, payment_amount) {
+    nleqslv(x=1,
+            fn=function(x) {
+                loan_amount / sum((1 + x)^(-(1:loan_term))) - payment_amount
+                })$x
+}
+```
+
+## Amortization schedule
+
+```{r, echo=TRUE, eval=TRUE}
+amortize = function(loan_term, loan_amount, payment_amount) {
+    # initialize amortization schedule data frame and calculate interest
+    schedule = data.frame(payment = rep(payment_amount, loan_term),
+                          principal_payment = rep(0, loan_term),
+                          interest_payment = rep(0, loan_term),
+                          remaining_principal = rep(0, loan_term))
+    rate = get_interest(loan_term, loan_amount, payment_amount)
+    interest = loan_amount * rate
+    
+    # iteratively populate and return schedule
+    schedule[1, 'interest_payment'] = interest
+    schedule[1, 'principal_payment'] = payment_amount - interest
+    schedule[1, 'remaining_principal'] = loan_amount - schedule[1, 'principal_payment']
+    
+    for (i in 2:loan_term) {
+        schedule[i, 'interest_payment'] =  schedule[i - 1, 'remaining_principal'] * rate
+        schedule[i, 'principal_payment'] =  payment_amount - schedule[i, 'interest_payment']
+        schedule[i, 'remaining_principal'] =  schedule[i - 1, 'remaining_principal'] - 
+            schedule[i, 'principal_payment']
+    }
+    return(schedule)
+}
+```
+
+## Amortization schedule
+
+```{r, echo=TRUE}
+amortize(10, 1000, 120)
+```
+
+## Putting it all together
+
+```{r, echo=TRUE, eval=FALSE}
+compute_cash_flow(x,
+                  loan_term,
+                  loan_amount,
+                  payment_amount,
+                  default_model,
+                  prepay_model,
+                  j=0)
+```
+
+This returns a list that contains the amortization schedule, estimated default and prepayment curves, expected cash flow by installment, as well as the total expected cash.  The extra parameter `j` allows for making updated projections.
+
+## Updating the projections
+
+Given that a loan is current at time $j$ then for $i > j$
+
+$$
+\text{E}(Y_i) = c \frac{P(T_d > i)}{P(T_d > j)} \frac{P(T_p > i)}{P(T_p > j)} + c_i \frac{P(T_d > i)}{P(T_d > j)} \frac{P(T_p = i)}{P(T_p > j)} .
+$$
+
+The additional cash expected can be found by summing over $i \in \{j+1, \ldots, n \}$.
+
+## References
+
+- Hastie, T., Tibshirani, R.  "Generalized Additive Models." *Statistical Science*. Vol. 1, No. 3, 1986, pg. 297-318.
+
+- Allison, P. "Discrete-Time Methods for the Analysis of Event Histories."  *Sociological Methodology*. Vol. 13, 1982, pg. 61-98.
