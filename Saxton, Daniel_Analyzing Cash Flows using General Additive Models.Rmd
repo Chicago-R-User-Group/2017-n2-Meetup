@@ -53,9 +53,7 @@ In words, which of $T_d$, $T_p$ or $n$ is the smallest determines the outcome of
 
 If $X$ is the total collected on a given loan and $Y_i$ the amount collected at installment $i$
 
-$$
-\text{E}(X) = \sum_{i=1}^{n} \text{E}(Y_i) .
-$$
+$\text{E}(X) = \sum_{i=1}^{n} \text{E}(Y_i)$
 
 ## Expected cash
 
@@ -75,10 +73,10 @@ $$
 
 We also have the nice relationship
 
-\begin{align}
+$$\begin{align}
 P(T > k) &= \prod_{j=1}^{k} \left [ 1 - h(j) \right ] .
 \end{align}
-
+$$
 ## Hazard function
 
 - The hazard function is a probability and so can be modeled using any probabilistic classifier
@@ -113,9 +111,10 @@ expanded
 
 Let $\mu_i \in \Theta$ be the mean of $y_i$, $g : \Theta \mapsto \mathbb{R}$ a link function and $\{ x_{ij} \}_{j=1}^{p}$ a set of covariate values.
 
+$$ 
+g(\mu_i) = s_0 + \sum_{j=1}^{p} s(x_{ij}) 
 $$
-g(\mu_i) = s_0 + \sum_{j=1}^{p} s(x_{ij})
-$$
+
 
 where the $\{ s_j \}_{j=1}^{p}$ are smooth functions and $s_0$ a constant.  
 
@@ -137,7 +136,7 @@ where the $\{ s_j \}_{j=1}^{p}$ are smooth functions and $s_0$ a constant.
 
 ## Example
 
-$$
+$$ 
 y_i = \log(x_i) + \epsilon_i
 $$
 
