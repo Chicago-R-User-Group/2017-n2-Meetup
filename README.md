@@ -1,4 +1,4 @@
-# Predictive Financial Analytics: Income Statement Classification | GAM cash flows
+# Predictive Financial Analytics: Income Statement Classification & Analyzing cash flows with General Additive Models
 
 March, 7th 2017
 
