@@ -1,4 +1,4 @@
-# Predictive Financial Analytics: Income Statement Classification & Analyzing cash flows with General Additive Models
+# Predictive Financial Analytics: Income Statement Classification & Analyzing Cash Flows with General Additive Models
 
 March, 7th 2017
 
