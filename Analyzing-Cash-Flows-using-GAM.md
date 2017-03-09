@@ -83,25 +83,25 @@ $$
 Sample data
 -----------
 
-    ##      event install_num term payment amount x
-    ## 1  default           1    5     300   1000 5
-    ## 2   prepay           3   15     200   2000 7
-    ## 3  default           2    3     200    500 3
-    ## 4 full_pay           4    4     300   1500 2
+    ##      event install_num term payment amount  x
+    ## 1  default           1    5     300   1000 12
+    ## 2   prepay           3   15     200   2000  4
+    ## 3  default           2    3     200    500  6
+    ## 4 full_pay           4    4     300   1500  8
 
 After formatting:
 
-    ##    install_num term payment amount x default prepay
-    ## 1            1    5     300   1000 5       1      0
-    ## 2            1   15     200   2000 7       0      0
-    ## 3            2   15     200   2000 7       0      0
-    ## 4            3   15     200   2000 7       0      1
-    ## 5            1    3     200    500 3       0      0
-    ## 6            2    3     200    500 3       1      0
-    ## 7            1    4     300   1500 2       0      0
-    ## 8            2    4     300   1500 2       0      0
-    ## 9            3    4     300   1500 2       0      0
-    ## 10           4    4     300   1500 2       0      0
+    ##    install_num term payment amount  x default prepay
+    ## 1            1    5     300   1000 12       1      0
+    ## 2            1   15     200   2000  4       0      0
+    ## 3            2   15     200   2000  4       0      0
+    ## 4            3   15     200   2000  4       0      1
+    ## 5            1    3     200    500  6       0      0
+    ## 6            2    3     200    500  6       1      0
+    ## 7            1    4     300   1500  8       0      0
+    ## 8            2    4     300   1500  8       0      0
+    ## 9            3    4     300   1500  8       0      0
+    ## 10           4    4     300   1500  8       0      0
 
 Generalized additive models
 ---------------------------
@@ -138,7 +138,7 @@ Example
 
 *y*<sub>*i*</sub> = log(*x*<sub>*i*</sub>)+*ϵ*<sub>*i*</sub>
 
-<img src="Saxton,_Daniel_Analyzing_Cash_Flows_using_General_Additive_Models_files/figure-markdown_github/unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
+<img src="Analyzing-Cash-Flows-using-GAM_files/figure-markdown_github/unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
 
 Smooth fit
 ----------
@@ -148,7 +148,7 @@ model = gam(y ~ s(x), data=data_set)
 plot(model)
 ```
 
-<img src="Saxton,_Daniel_Analyzing_Cash_Flows_using_General_Additive_Models_files/figure-markdown_github/unnamed-chunk-4-1.png" style="display: block; margin: auto;" />
+<img src="Analyzing-Cash-Flows-using-GAM_files/figure-markdown_github/unnamed-chunk-4-1.png" style="display: block; margin: auto;" />
 
 Smooth fit
 ----------
@@ -158,14 +158,14 @@ model = gam(y ~ s(x, df=2), data=data_set)
 plot(model)
 ```
 
-<img src="Saxton,_Daniel_Analyzing_Cash_Flows_using_General_Additive_Models_files/figure-markdown_github/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
+<img src="Analyzing-Cash-Flows-using-GAM_files/figure-markdown_github/unnamed-chunk-5-1.png" style="display: block; margin: auto;" />
 
 Example
 -------
 
 *y*<sub>*i*</sub> = *x*<sub>*i*</sub><sup>2</sup> + *ϵ*<sub>*i*</sub>
 
-<img src="Saxton,_Daniel_Analyzing_Cash_Flows_using_General_Additive_Models_files/figure-markdown_github/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
+<img src="Analyzing-Cash-Flows-using-GAM_files/figure-markdown_github/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
 
 Smooth fit
 ----------
@@ -175,7 +175,7 @@ model = gam(y ~ s(x), data=data_set)
 plot(model)
 ```
 
-<img src="Saxton,_Daniel_Analyzing_Cash_Flows_using_General_Additive_Models_files/figure-markdown_github/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
+<img src="Analyzing-Cash-Flows-using-GAM_files/figure-markdown_github/unnamed-chunk-7-1.png" style="display: block; margin: auto;" />
 
 Additive logistic regression
 ----------------------------
@@ -189,17 +189,17 @@ $$
 Additive hazard model
 ---------------------
 
-    ##    install_num term payment amount x default prepay
-    ## 1            1    5     300   1000 5       1      0
-    ## 2            1   15     200   2000 7       0      0
-    ## 3            2   15     200   2000 7       0      0
-    ## 4            3   15     200   2000 7       0      1
-    ## 5            1    3     200    500 3       0      0
-    ## 6            2    3     200    500 3       1      0
-    ## 7            1    4     300   1500 2       0      0
-    ## 8            2    4     300   1500 2       0      0
-    ## 9            3    4     300   1500 2       0      0
-    ## 10           4    4     300   1500 2       0      0
+    ##    install_num term payment amount  x default prepay
+    ## 1            1    5     300   1000 12       1      0
+    ## 2            1   15     200   2000  4       0      0
+    ## 3            2   15     200   2000  4       0      0
+    ## 4            3   15     200   2000  4       0      1
+    ## 5            1    3     200    500  6       0      0
+    ## 6            2    3     200    500  6       1      0
+    ## 7            1    4     300   1500  8       0      0
+    ## 8            2    4     300   1500  8       0      0
+    ## 9            3    4     300   1500  8       0      0
+    ## 10           4    4     300   1500  8       0      0
 
 ``` r
 default_model = gam(default ~ s(install_num) + s(x),
